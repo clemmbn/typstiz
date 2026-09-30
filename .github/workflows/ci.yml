@@ -46,6 +46,7 @@ jobs:
             echo "::warning::COOLIFY_WEBHOOK / COOLIFY_TOKEN secrets are not set; skipping deployment."
             exit 0
           fi
-          curl --fail-with-body --silent --show-error --max-time 30 \
+          # Recent Coolify versions only accept POST on /api/v1/deploy (GET returns 405).
+          curl --fail-with-body --silent --show-error --max-time 30 -X POST \
             -H "Authorization: Bearer $COOLIFY_TOKEN" \
             "$COOLIFY_WEBHOOK"
