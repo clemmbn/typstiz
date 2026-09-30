@@ -83,3 +83,8 @@ Notes:
 
 Inspired by [TypeLaTeX](https://www.typelatex.com/) and [Texnique](https://texnique.xyz/). Typstiz brings the same
 game to [Typst](https://typst.app).
+
+## License
+
+[MIT](LICENSE). The bundled New Computer Modern fonts in `public/fonts/` keep their own license
+(GUST Font License).
