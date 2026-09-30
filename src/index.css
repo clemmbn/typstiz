@@ -221,6 +221,8 @@ button.link:hover { color: var(--text); }
 .hint-shows { font-size: 1.2em; color: var(--accent); }
 
 .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.docs-link { justify-self: center; font-size: 11px; color: var(--muted); opacity: 0.6; text-decoration: none; }
+.docs-link:hover { opacity: 1; text-decoration: underline; }
 
 /* ---------- Results / Stats ---------- */
 .results, .stats { display: grid; gap: 16px; }

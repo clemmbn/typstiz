@@ -27,6 +27,7 @@ import { ItemMetricsTracker } from '../game/metrics';
 import { SCORING_CONFIG } from '../game/scoring.config';
 import { registerItemProbe, useGame, type ItemOutcome, type Target } from '../game/store';
 import type { GameSettings } from '../game/types';
+import { docFor } from './docs';
 import { InputField } from './InputField';
 import { MathView } from './MathView';
 
@@ -213,6 +214,15 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
 
   const hintsLeft = availableHints(target.expr.source[settings.language] ?? '', value, revealed.map((h) => h.token)).length;
 
+  const doc = docFor(settings.language);
+
+  // Coming back from the docs tab: put the caret back in the input so typing resumes immediately.
+  useEffect(() => {
+    const refocus = () => inputRef.current?.focus();
+    window.addEventListener('focus', refocus);
+    return () => window.removeEventListener('focus', refocus);
+  }, []);
+
   const quit = () => (settings.mode === 'zen' ? void endRun() : abandonRun());
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -257,6 +267,18 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
           {settings.mode === 'zen' ? 'End session' : 'Quit'} <kbd>Esc</kbd>
         </button>
       </div>
+      {/* Discreet docs link: new tab, tiny and muted on purpose (a fallback, not a feature).
+          The clock keeps running while the player reads; that is the intended cost. */}
+      <a
+        className="docs-link"
+        href={doc.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        tabIndex={-1}
+        onClick={() => console.info('[game-screen] docs opened', { language: settings.language })}
+      >
+        docs ↗
+      </a>
     </>
   );
 }

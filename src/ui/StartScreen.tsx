@@ -5,6 +5,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useGame } from '../game/store';
 import type { GameSettings } from '../game/types';
+import { docFor } from './docs';
 
 type Option<T> = { value: T; label: string; disabled?: boolean };
 
@@ -16,6 +17,8 @@ export function StartScreen() {
   const [starting, setStarting] = useState(false);
   const startRef = useRef<HTMLButtonElement>(null);
   const ready = engineStatus === 'ready';
+  // Single doc link for the currently selected language.
+  const doc = docFor(settings.language);
 
   const start = async () => {
     if (!ready || starting) return;
@@ -53,9 +56,7 @@ export function StartScreen() {
       </p>
       {/* Reference links: opened in a new tab so an in-progress setup is not lost. */}
       <p className="refs">
-        Need a hint? <a href="https://typst.app/docs/reference/math/" target="_blank" rel="noopener noreferrer">Typst math docs</a>
-        {' · '}
-        <a href="https://typst.app/docs/reference/symbols/sym/" target="_blank" rel="noopener noreferrer">Symbol list</a>
+        Need a hint? <a href={doc.url} target="_blank" rel="noopener noreferrer">{doc.label}</a>
       </p>
 
       <Field label="Mode">
