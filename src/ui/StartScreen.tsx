@@ -94,7 +94,7 @@ export function StartScreen() {
         <Segmented
           value={settings.language}
           onChange={set('language')}
-          options={[{ value: 'typst', label: 'Typst' }, { value: 'latex', label: 'LaTeX (soon)', disabled: true }]}
+          options={[{ value: 'typst', label: 'Typst' }, { value: 'latex', label: 'KaTeX (soon)', disabled: true }]}
         />
       </Field>
 
