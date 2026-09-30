@@ -57,11 +57,12 @@ npm run build      # static bundle in dist/
 | Cloudflare Pages | Build command `npm run build`, output `dist`. Cache headers come from `public/_headers`. |
 | Netlify | Same as above; `_headers` is honored. |
 | Vercel | Framework preset "Vite"; cache headers come from `vercel.json`. |
+| Docker / Coolify | `Dockerfile` builds the bundle and serves it with nginx on port 80 (config in `deploy/nginx.conf`, same cache headers, assets precompressed). Coolify: build pack "Dockerfile", port 80. CI triggers the deploy on `main` via the `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN` repo secrets. |
 
 Notes:
 - The Typst compiler WASM is ~28 MB (~11 MB gzipped). It has a content-hashed URL and is served
   with `immutable` caching, so it downloads once. It loads in parallel with the start screen.
-- The host must serve `.wasm` as `application/wasm` (all three above do) for streaming compilation.
+- The host must serve `.wasm` as `application/wasm` (all the hosts above do) for streaming compilation.
 - Fonts (New Computer Modern, from `typst/typst-assets` v0.13.1) are self-hosted in `public/fonts/`
   so every player renders with identical glyphs. The engine self-checks fonts at startup and
   shows an error instead of silently comparing broken renders.
