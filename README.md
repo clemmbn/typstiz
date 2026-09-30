@@ -78,3 +78,8 @@ Notes:
 - Product spec: [spec.md](spec.md). Implementation plan and status: [PLAN.md](PLAN.md).
 
 </details>
+
+## Credits
+
+Inspired by [TypeLaTeX](https://www.typelatex.com/) and [Texnique](https://texnique.xyz/). Typstiz brings the same
+game to [Typst](https://typst.app).
