@@ -69,11 +69,14 @@ export function App() {
           </button>
         </h1>
         <nav className="nav">
+          {/* Stats link + divider only outside a run; mid-run a lone divider would dangle. */}
           {!inRun && (
-            <button type="button" className="link" onClick={() => goTo('stats')}>stats</button>
+            <>
+              <button type="button" className="link" onClick={() => goTo('stats')}>stats</button>
+              {/* Divider separates page navigation (stats) from utilities (theme, repo). */}
+              <span className="nav-sep" aria-hidden="true" />
+            </>
           )}
-          {/* Divider separates page navigation (stats) from utilities (theme, repo). */}
-          <span className="nav-sep" aria-hidden="true" />
           <button
             type="button"
             className="link icon-btn"
