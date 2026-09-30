@@ -33,12 +33,12 @@
     --text: #ecebe6;
     --muted: #9c9a92;
     --border: #34352f;
-    --accent: #5db0d6;
+    --accent: #47A3D1;
     --accent-contrast: #0c1a1c;
     --success: #6fcf7c;
     --danger: #ff8a80;
     --warn: #f0b95b;
-    --focus: #5db0d6;
+    --focus: #47A3D1;
     color-scheme: dark;
   }
 }
@@ -49,12 +49,12 @@
   --text: #ecebe6;
   --muted: #9c9a92;
   --border: #34352f;
-  --accent: #5db0d6;
+  --accent: #47A3D1;
   --accent-contrast: #0c1a1c;
   --success: #6fcf7c;
   --danger: #ff8a80;
   --warn: #f0b95b;
-  --focus: #5db0d6;
+  --focus: #47A3D1;
   color-scheme: dark;
 }
 
