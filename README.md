@@ -1,6 +1,6 @@
 <h1 align="center">Typstiz</h1>
 
-**A typing race for math.** A rendered expression appears. Type the [Typst](https://typst.app)
+**A [Typst](https://typst.app) speed-typesetting game.** A rendered expression appears. Type the 
 source that reproduces it, as fast as you can.
 
 <p align="center">
