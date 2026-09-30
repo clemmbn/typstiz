@@ -1,0 +1,8 @@
+# Cache headers for Cloudflare Pages and Netlify (both read this file from the build output).
+# Hashed build assets (JS, CSS, WASM) never change under the same URL: cache forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fonts are not content-hashed; cache for a week and revalidate after.
+/fonts/*
+  Cache-Control: public, max-age=604800

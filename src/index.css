@@ -1,0 +1,247 @@
+/*
+ * Global styles. Colors are tokens on :root, redefined for dark mode both via
+ * prefers-color-scheme (unless the user forced light) and via [data-theme="dark"].
+ * Math SVGs from Typst use fill="#000"; we recolor them to currentColor so they follow the theme.
+ */
+
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --text: #1d1d1b;
+  --muted: #6b6a64;
+  --border: #dcdad2;
+  --accent: #117f8c;
+  --accent-contrast: #ffffff;
+  --success: #2f8a3e;
+  --danger: #b3261e;
+  --warn: #9a6400;
+  --focus: #117f8c;
+  --radius: 8px;
+  color-scheme: light;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #151614;
+    --surface: #1f201d;
+    --text: #ecebe6;
+    --muted: #9c9a92;
+    --border: #34352f;
+    --accent: #4fc3cf;
+    --accent-contrast: #0c1a1c;
+    --success: #6fcf7c;
+    --danger: #ff8a80;
+    --warn: #f0b95b;
+    --focus: #4fc3cf;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #151614;
+  --surface: #1f201d;
+  --text: #ecebe6;
+  --muted: #9c9a92;
+  --border: #34352f;
+  --accent: #4fc3cf;
+  --accent-contrast: #0c1a1c;
+  --success: #6fcf7c;
+  --danger: #ff8a80;
+  --warn: #f0b95b;
+  --focus: #4fc3cf;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+kbd {
+  font-size: 0.75em;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+code { font-size: 0.9em; }
+.muted { color: var(--muted); }
+
+.app {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 16px;
+  min-height: 100vh;
+}
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+.logo { margin: 0; font-size: 20px; }
+.logo button { font-weight: 700; letter-spacing: -0.02em; }
+.nav { display: flex; gap: 16px; }
+
+button {
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { cursor: not-allowed; opacity: 0.6; }
+button.primary { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); font-weight: 600; }
+button.primary kbd { color: inherit; border-color: currentColor; opacity: 0.7; }
+button.link { background: none; border: none; padding: 2px 4px; color: var(--muted); }
+button.link:hover { color: var(--text); }
+.logo button.link { color: var(--text); }
+
+/* ---------- Start ---------- */
+.start { display: grid; gap: 18px; max-width: 560px; margin: 0 auto; }
+.tagline { color: var(--muted); margin: 0 0 8px; }
+.field { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 12px; }
+.field-label { color: var(--muted); font-size: 13px; }
+.segmented { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg {
+  position: relative;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 14px;
+}
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.seg.disabled { opacity: 0.45; cursor: not-allowed; }
+.seg:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.seed-input {
+  width: 100%;
+  max-width: 220px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.start-actions { display: grid; gap: 12px; margin-top: 12px; justify-items: start; }
+.status { margin: 0; color: var(--muted); }
+.status.error { color: var(--danger); }
+
+/* ---------- Countdown ---------- */
+.countdown { display: grid; place-items: center; min-height: 50vh; }
+.countdown-number { font-size: 96px; font-weight: 700; color: var(--accent); animation: pop 0.7s ease-out; }
+@keyframes pop { from { transform: scale(1.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ---------- Game ---------- */
+.game { display: grid; gap: 14px; }
+.hud { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.hud-cell {
+  display: grid;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.hud-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.hud-value { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.hud-cell.low { border-color: var(--danger); }
+.hud-cell.low .hud-value { color: var(--danger); }
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  padding: 24px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.stage.preview { min-height: 120px; border-style: dashed; }
+.stage-label, .tier {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.tier-easy { color: var(--success); }
+.tier-medium { color: var(--warn); }
+.tier-hard { color: var(--danger); }
+
+.target { border-radius: var(--radius); }
+.target.flash { animation: solved 0.5s ease-out; }
+@keyframes solved {
+  from { box-shadow: 0 0 0 4px var(--success); background: color-mix(in srgb, var(--success) 15%, transparent); }
+  to { box-shadow: 0 0 0 0 transparent; background: transparent; }
+}
+
+.math { display: grid; place-items: center; max-width: 100%; color: var(--text); }
+.math svg { max-width: 100%; overflow: visible; }
+.math svg [fill='#000'], .math svg [fill='#000000'] { fill: currentColor; }
+.math svg [stroke='#000'], .math svg [stroke='#000000'] { stroke: currentColor; }
+
+.source-input {
+  width: 100%;
+  resize: none;
+  padding: 12px 14px;
+  font-size: 18px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.source-input:focus { outline: none; border-color: var(--accent); }
+.source-input.invalid { border-color: var(--warn); }
+.input-status { margin: -8px 0 0; min-height: 1.5em; font-size: 12px; color: var(--warn); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- Results / Stats ---------- */
+.results, .stats { display: grid; gap: 16px; }
+.results-mode { margin: 0; color: var(--muted); }
+.big-score { margin: 0; font-size: 72px; font-weight: 700; line-height: 1; color: var(--accent); }
+.badge {
+  justify-self: start;
+  margin: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--success);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 13px;
+}
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; }
+.stat { padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.stat dt { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.stat dd { margin: 0; font-size: 22px; font-weight: 600; }
+.stats h2 { font-size: 16px; margin: 8px 0 0; }
+
+.items { width: 100%; border-collapse: collapse; font-size: 13px; display: block; overflow-x: auto; }
+.items th, .items td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.items th { color: var(--muted); font-weight: 400; }
+.items tr.best td { color: var(--success); }
+.items tr.worst td { color: var(--danger); }
+.items tr.skipped td { color: var(--muted); }
+
+@media (max-width: 600px) {
+  .field { grid-template-columns: 1fr; gap: 6px; }
+  .hud, .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .big-score { font-size: 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; }
+}
