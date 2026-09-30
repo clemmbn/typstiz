@@ -104,6 +104,7 @@ src/
 - [x] Loading state until the engine is ready, loud failure if self-check fails
 - [x] Keyboard-only flow end to end
 - [x] Static deploy notes (Cloudflare Pages / Netlify / Vercel), long-cache headers for hashed assets
+- [x] Docker image (nginx, precompressed assets) for Coolify, CD job in CI triggering the Coolify deploy webhook
 
 ### Later
 - LaTeX mode via KaTeX (`engines/latex/`, `latex` fields on templates)

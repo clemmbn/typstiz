@@ -1,0 +1,12 @@
+# Keep the Docker build context small and the build reproducible (deps come from npm ci).
+node_modules
+dist
+.git
+.github
+.vscode
+.idea
+*.log
+*.local
+.DS_Store
+docs
+assets

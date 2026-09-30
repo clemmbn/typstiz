@@ -1,5 +1,6 @@
 # CI: typecheck, lint, tests (incl. the spec §6.1 equivalence acceptance test and the
 # "every generated expression compiles" suite, both on the real typst.ts WASM), and build.
+# CD: on a push to main, once every check passes, trigger the Coolify deployment.
 name: CI
 on:
   push:
@@ -12,10 +13,39 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22 # keep in sync with the Dockerfile base image
           cache: npm
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  # Builds the production image (not pushed) so a broken Dockerfile fails here, not on the VPS.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t typstiz:ci .
+
+  deploy:
+    needs: [check, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Never run two deployments at once; a newer push supersedes a queued one.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Trigger Coolify deployment
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          if [ -z "$COOLIFY_WEBHOOK" ] || [ -z "$COOLIFY_TOKEN" ]; then
+            echo "::warning::COOLIFY_WEBHOOK / COOLIFY_TOKEN secrets are not set; skipping deployment."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_WEBHOOK"
