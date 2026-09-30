@@ -7,7 +7,7 @@ import { repository, useGame } from '../game/store';
 import type { RunRecord } from '../game/types';
 
 export function StatsScreen() {
-  const { goTo } = useGame.getState();
+  const { goTo, viewRun } = useGame.getState();
   const [best, setBest] = useState<RunRecord[] | null>(null);
   const [recent, setRecent] = useState<RunRecord[]>([]);
 
@@ -22,6 +22,13 @@ export function StatsScreen() {
     return () => window.removeEventListener('keydown', onKey);
   }, [goTo]);
 
+  /** Compact icon button that re-opens the end-of-run recap for a stored run. */
+  const recapButton = (r: RunRecord) => (
+    <button type="button" className="link" title="Show recap" aria-label="Show recap" onClick={() => viewRun(r)}>
+      →
+    </button>
+  );
+
   return (
     <main className="stats">
       <h2>Best scores</h2>
@@ -29,7 +36,7 @@ export function StatsScreen() {
         <p className="muted">No runs yet. Play one!</p>
       ) : (
         <table className="items">
-          <thead><tr><th>mode</th><th>difficulty</th><th>language</th><th>score</th><th>solved</th><th>date</th></tr></thead>
+          <thead><tr><th>mode</th><th>difficulty</th><th>language</th><th>score</th><th>solved</th><th>date</th><th></th></tr></thead>
           <tbody>
             {best.map((r) => (
               <tr key={r.id}>
@@ -39,6 +46,7 @@ export function StatsScreen() {
                 <td>{r.score.toFixed(0)}</td>
                 <td>{r.items.filter((i) => !i.skipped).length}</td>
                 <td>{new Date(r.createdAt).toLocaleDateString()}</td>
+                <td>{recapButton(r)}</td>
               </tr>
             ))}
           </tbody>
@@ -49,7 +57,7 @@ export function StatsScreen() {
         <>
           <h2>Recent runs</h2>
           <table className="items">
-            <thead><tr><th>mode</th><th>difficulty</th><th>score</th><th>seed</th><th>when</th></tr></thead>
+            <thead><tr><th>mode</th><th>difficulty</th><th>score</th><th>seed</th><th>when</th><th></th></tr></thead>
             <tbody>
               {recent.map((r) => (
                 <tr key={r.id}>
@@ -58,6 +66,7 @@ export function StatsScreen() {
                   <td>{r.score.toFixed(0)}</td>
                   <td><code>{r.seed}</code></td>
                   <td>{new Date(r.createdAt).toLocaleString()}</td>
+                  <td>{recapButton(r)}</td>
                 </tr>
               ))}
             </tbody>

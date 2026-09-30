@@ -1,6 +1,7 @@
 /**
  * Results screen: score, new-best badge, raw stats (spec §8.2) and the per-item list.
- * Keys: Enter or R = restart with the same settings, S = stats, Esc = back to start.
+ * Keys: Enter or R = restart with the same settings, S = stats, Esc = back to start (or to stats
+ * when the recap was opened from there).
  */
 import { useEffect } from 'react';
 import { useGame } from '../game/store';
@@ -9,6 +10,7 @@ import type { ItemRecord } from '../game/types';
 export function ResultsScreen() {
   const run = useGame((s) => s.lastRun)!;
   const isBest = useGame((s) => s.lastRunIsBest);
+  const fromStats = useGame((s) => s.resultsFrom) === 'stats';
   const { startRun, goTo } = useGame.getState();
 
   useEffect(() => {
@@ -19,11 +21,11 @@ export function ResultsScreen() {
         e.preventDefault();
         void startRun();
       } else if (k === 's') goTo('stats');
-      else if (k === 'escape') goTo('start');
+      else if (k === 'escape') goTo(fromStats ? 'stats' : 'start');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [startRun, goTo]);
+  }, [startRun, goTo, fromStats]);
 
   const stats = summarize(run.items);
 
@@ -67,7 +69,9 @@ export function ResultsScreen() {
       <div className="controls">
         <button type="button" className="primary" onClick={() => void startRun()}>Again <kbd>Enter</kbd></button>
         <button type="button" onClick={() => goTo('stats')}>Stats <kbd>S</kbd></button>
-        <button type="button" onClick={() => goTo('start')}>Menu <kbd>Esc</kbd></button>
+        <button type="button" onClick={() => goTo(fromStats ? 'stats' : 'start')}>
+          {fromStats ? 'Back' : 'Menu'} <kbd>Esc</kbd>
+        </button>
       </div>
     </main>
   );
