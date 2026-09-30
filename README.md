@@ -1,15 +1,44 @@
-# Typstiz
+<p align="center">
+  <img src="docs/logo.png" alt="Typstiz logo" width="128">
+</p>
 
-A math typing race. A rendered expression appears; type the [Typst](https://typst.app) source that
-reproduces it, as fast as possible. Answers are checked by **rendered equivalence**: `a/b` and
-`frac(a, b)` both count.
+<h1 align="center">Typstiz</h1>
 
-Everything runs in the browser (typst.ts WASM compiler); there is no backend.
+**A typing race for math.** A rendered expression appears. Type the [Typst](https://typst.app)
+source that reproduces it, as fast as you can.
 
-- Product spec: [spec.md](spec.md)
-- Implementation plan and status: [PLAN.md](PLAN.md)
+<p align="center">
+  <img src="docs/header.webp" alt="Typstiz: a rendered integral to reproduce, the Typst source being typed, and a live preview" width="100%">
+</p>
 
-## Develop
+Typstiz doesn't compare text, it compares what gets drawn. `a/b` and `frac(a, b)` produce the same
+fraction, so both count. Write it your way.
+
+Everything runs in your browser. No account, no backend, nothing to install.
+
+## How to play
+
+1. Pick a mode, a difficulty and a duration on the start screen.
+2. A target expression is shown. Type Typst source in the input; a live preview renders as you type.
+3. The moment your render matches the target, you score and the next expression appears.
+
+| Key | Action |
+|---|---|
+| `Tab` | Skip the current expression (scores 0) |
+| `Shift+Tab` | Reveal a hint for a symbol, at a small cost in score |
+| `Esc` | End the session |
+
+- **Timed run:** solve as many expressions as you can before the clock runs out.
+- **Zen:** no clock, quit whenever you like.
+- **Difficulty:** easy, medium, hard, or random. Harder tiers bring integrals, matrices, sums and
+  nested structures.
+- Faster solves score more. Your best runs are kept in your browser's local storage.
+
+New to Typst math? The [math reference](https://typst.app/docs/reference/math/) lists every symbol
+and function.
+
+<details>
+<summary>Run it locally</summary>
 
 ```bash
 npm install
@@ -20,7 +49,10 @@ npm run lint
 npm run build      # static bundle in dist/
 ```
 
-## Deploy
+</details>
+
+<details>
+<summary>Deploy</summary>
 
 `npm run build` outputs a fully static site in `dist/` that works from any path (`base: './'`).
 
@@ -37,3 +69,16 @@ Notes:
 - Fonts (New Computer Modern, from `typst/typst-assets` v0.13.1) are self-hosted in `public/fonts/`
   so every player renders with identical glyphs. The engine self-checks fonts at startup and
   shows an error instead of silently comparing broken renders.
+
+</details>
+
+<details>
+<summary>Under the hood</summary>
+
+- Answers are compiled in-browser with [typst.ts](https://github.com/Myriad-Dreamin/typst.ts)
+  (WASM) and compared by rendered output.
+- Expressions come from a seeded template generator, so runs are reproducible.
+- Built with React, TypeScript, Vite and Zustand.
+- Product spec: [spec.md](spec.md). Implementation plan and status: [PLAN.md](PLAN.md).
+
+</details>
