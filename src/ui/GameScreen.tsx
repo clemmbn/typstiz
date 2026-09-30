@@ -19,7 +19,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 're
 import { getEngine } from '../engines/registry';
 import type { RenderResult } from '../engines/types';
 import { ItemMetricsTracker } from '../game/metrics';
-import { useGame, type ItemOutcome, type Target } from '../game/store';
+import { registerItemProbe, useGame, type ItemOutcome, type Target } from '../game/store';
 import type { GameSettings } from '../game/types';
 import { InputField } from './InputField';
 import { MathView } from './MathView';
@@ -124,6 +124,17 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
    * Compile the latest input if it is still the latest; detect a match.
    * @param seq - sequence number of the input that scheduled this compile
    */
+  // Let the store capture this item if the run ends (buzzer / End session) before it is finished.
+  // Untouched items (no keystrokes) are not reported: the player never started them.
+  useEffect(() => {
+    registerItemProbe(() => {
+      const t = tracker.current;
+      if (done.current || t.startedAt === null) return null;
+      return outcome(t.elapsed(performance.now()));
+    });
+    return () => registerItemProbe(null);
+  }, [outcome]);
+
   const compile = useCallback(async (seq: number) => {
     const input = latest.current;
     if (input.seq !== seq || done.current) return;

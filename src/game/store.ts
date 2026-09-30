@@ -10,6 +10,8 @@
  * - The game only talks to `MathEngine` via the registry, never to Typst directly.
  * - Timed runs end exactly at `endsAt`; `solve` calls arriving after the buzzer are discarded
  *   (a compile in flight at the buzzer does not count).
+ * - The item still in progress when the run ends is recorded as an unfinished (skipped) item, via a
+ *   probe the game screen registers (`registerItemProbe`), so it shows up in the recap.
  */
 import { create } from 'zustand';
 import { getEngine } from '../engines/registry';
@@ -60,6 +62,8 @@ type GameStore = {
   run: RunState | null;
   lastRun: RunRecord | null;
   lastRunIsBest: boolean;
+  /** Where the results screen was opened from; decides where Esc / Back return to. */
+  resultsFrom: 'game' | 'stats';
 
   initEngine(): Promise<void>;
   updateSettings(patch: Partial<GameSettings>): void;
@@ -70,9 +74,26 @@ type GameStore = {
   endRun(): Promise<void>;
   abandonRun(): void;
   goTo(screen: 'start' | 'stats'): void;
+  viewRun(record: RunRecord): void;
 };
 
 const LOG = '[game]';
+
+/**
+ * Reports the in-progress item's metrics, or null when there is nothing worth recording (the item
+ * is already finished, or the player never typed). Registered by the game screen's ItemBoard.
+ */
+type ItemProbe = () => ItemOutcome | null;
+let itemProbe: ItemProbe | null = null;
+
+/**
+ * Register (or clear) the probe used by `endRun` to capture the unfinished item.
+ * Side effect: replaces the module-level probe; call with null on unmount.
+ * @param probe - metrics getter for the current item, or null to clear
+ */
+export function registerItemProbe(probe: ItemProbe | null): void {
+  itemProbe = probe;
+}
 export const repository: ScoreRepository = new LocalScoreRepository();
 
 /**
@@ -154,6 +175,7 @@ export const useGame = create<GameStore>((set, get) => {
     run: null,
     lastRun: null,
     lastRunIsBest: false,
+    resultsFrom: 'game',
 
     async initEngine() {
       const { language } = get().settings;
@@ -203,7 +225,12 @@ export const useGame = create<GameStore>((set, get) => {
       const run = get().run;
       if (!run || run.endedAt !== null) return;
       const endedAt = performance.now();
-      set({ run: { ...run, endedAt } });
+      // Capture the item the player was still working on BEFORE marking the run ended, then
+      // record it as skipped (score 0) so the recap shows it.
+      const pending = itemProbe?.() ?? null;
+      const items = pending ? [...run.items, toItemRecord(run, pending, true)] : run.items;
+      if (pending) console.info(`${LOG} unfinished item recorded at end of run`, pending);
+      set({ run: { ...run, items, endedAt } });
       const { settings } = run;
       const record: RunRecord = {
         schemaVersion: 1,
@@ -214,14 +241,14 @@ export const useGame = create<GameStore>((set, get) => {
         durationSec: settings.mode === 'timed' ? settings.durationSec : undefined,
         difficulty: settings.difficulty,
         seed: run.seed,
-        score: scoreRun(run.items),
-        items: run.items,
+        score: scoreRun(items),
+        items,
         appVersion: __APP_VERSION__,
       };
       console.info(`${LOG} run ended`, { score: record.score, items: record.items.length });
       // Empty runs (quit immediately) are shown but not stored, so they can't pollute stats.
       const { isNewBest } = record.items.length > 0 ? await repository.saveRun(record) : { isNewBest: false };
-      set({ screen: 'results', lastRun: record, lastRunIsBest: isNewBest });
+      set({ screen: 'results', lastRun: record, lastRunIsBest: isNewBest, resultsFrom: 'game' });
     },
 
     abandonRun() {
@@ -231,6 +258,17 @@ export const useGame = create<GameStore>((set, get) => {
 
     goTo(screen) {
       set({ screen, run: null });
+    },
+
+    /**
+     * Re-open the recap of a stored run from the stats screen.
+     * Side effect: replaces `lastRun`; the "new best" badge is hidden since it only applies right
+     * after a run.
+     * @param record - the stored run to display
+     */
+    viewRun(record) {
+      console.info(`${LOG} viewing past run`, { id: record.id, score: record.score });
+      set({ screen: 'results', lastRun: record, lastRunIsBest: false, resultsFrom: 'stats', run: null });
     },
   };
 });
