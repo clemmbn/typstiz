@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="docs/logo.png" alt="Typstiz logo" width="128">
-</p>
-
 <h1 align="center">Typstiz</h1>
 
 **A typing race for math.** A rendered expression appears. Type the [Typst](https://typst.app)
