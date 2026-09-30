@@ -38,9 +38,14 @@ export const GENERATOR_CONFIG: GeneratorConfig = {
   maxAttempts: 50,
 };
 
-/** Degenerate patterns that should never appear in a target. */
-const DEGENERATE = [
-  /\^\(?1\)?(?![\d.])/, // x^1 or x^(1)
+/**
+ * Degenerate patterns that should never appear in a target. Exported so tests check the exact
+ * same rules.
+ */
+export const DEGENERATE = [
+  // x^1 or x^(1). The lookbehind exempts an upper limit that follows a lower one
+  // (`integral_0^1`, `sum_(i=0)^1`), where 1 is a bound, not an exponent.
+  /(?<!_(?:\w+|\([^)]*\)))\^\(?1\)?(?![\d.])/,
   /frac\(1, ?1\)/,
   /(?<![\d.])1\/1(?![\d.])/,
 ];

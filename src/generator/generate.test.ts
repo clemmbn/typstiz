@@ -5,7 +5,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { getNodeTypstEngine } from '../test/nodeTypstEngine';
 import type { TypstEngine } from '../engines/typst/TypstEngine';
-import { createGenerator, fill, GENERATOR_CONFIG, type Difficulty } from './generate';
+import { createGenerator, DEGENERATE, fill, GENERATOR_CONFIG, type Difficulty } from './generate';
 import { TEMPLATES } from './templates/typst';
 import type { Tier } from './types';
 
@@ -37,13 +37,27 @@ describe('generator determinism and guards', () => {
     for (let i = 0; i < 5000; i++) {
       const expr = gen.next();
       const src = expr.source.typst!;
-      expect(src).not.toMatch(/\^\(?1\)?(?![\d.])/);
-      expect(src).not.toMatch(/frac\(1, ?1\)/);
+      for (const re of DEGENERATE) expect(src).not.toMatch(re);
       // Literal braces are allowed; a leftover `{name}` where name is one of this template's
       // slots means substitution failed.
       const slots = new Set(Object.keys(byId.get(expr.templateId)!.slots));
       for (const m of src.matchAll(/\{(\w+)\}/g)) expect(slots.has(m[1]), `${m[0]} in ${src}`).toBe(false);
     }
+  });
+
+  it('flags exponent 1 but not an upper limit of 1', () => {
+    const isDegenerate = (src: string) => DEGENERATE.some((re) => re.test(src));
+    for (const src of ['x^1', 'x^(1)', 'e^1 + y']) expect(isDegenerate(src), src).toBe(true);
+    for (const src of ['integral_0^1 x dif x', 'integral_(-1)^1 x', 'sum_(i=0)^1 i', 'x^12', 'x^1.5'])
+      expect(isDegenerate(src), src).toBe(false);
+  });
+
+  it('m-integral can use 1 as its upper limit', () => {
+    const gen = createGenerator('upper-one', 'medium');
+    const hits = Array.from({ length: 3000 }, () => gen.next()).filter(
+      (e) => e.templateId === 'm-integral' && /\^1 /.test(e.source.typst!),
+    );
+    expect(hits.length).toBeGreaterThan(0);
   });
 
   it('random difficulty roughly follows the 40/40/20 mix', () => {
