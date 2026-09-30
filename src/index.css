@@ -18,8 +18,9 @@
   --focus: #246B8F;
   --radius: 8px;
   color-scheme: light;
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  /* JetBrains Mono ligatures turn "->" / "<=" into arrow / ≤ glyphs (and mangle them
+  /* Space Mono ships only 400 and 700, so weight 600 renders as 700. */
+  font-family: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Programming-font ligatures can turn "->" / "<=" into arrow / ≤ glyphs (and mangle them
      mid-typing). The player must see exactly the characters they type, so turn them off. */
   font-variant-ligatures: none;
   font-feature-settings: 'liga' 0, 'calt' 0;
