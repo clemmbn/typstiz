@@ -21,7 +21,7 @@ let n = 0;
 function run(partial: Partial<RunRecord>): RunRecord {
   return {
     schemaVersion: 1, id: `r${n++}`, createdAt: new Date(0).toISOString(), language: 'typst', mode: 'timed',
-    durationSec: 60, difficulty: 'easy', seed: 's', previewOn: true, score: 0, items: [], appVersion: 'test', ...partial,
+    durationSec: 60, difficulty: 'easy', seed: 's', score: 0, items: [], appVersion: 'test', ...partial,
   };
 }
 

@@ -49,14 +49,13 @@ export function StatsScreen() {
         <>
           <h2>Recent runs</h2>
           <table className="items">
-            <thead><tr><th>mode</th><th>difficulty</th><th>score</th><th>preview</th><th>seed</th><th>when</th></tr></thead>
+            <thead><tr><th>mode</th><th>difficulty</th><th>score</th><th>seed</th><th>when</th></tr></thead>
             <tbody>
               {recent.map((r) => (
                 <tr key={r.id}>
                   <td>{modeLabel(r)}</td>
                   <td>{r.difficulty}</td>
                   <td>{r.score.toFixed(0)}</td>
-                  <td>{r.previewOn ? 'on' : 'off'}</td>
                   <td><code>{r.seed}</code></td>
                   <td>{new Date(r.createdAt).toLocaleString()}</td>
                 </tr>

@@ -77,7 +77,7 @@ src/
 - [x] `InputField` (paste/drop blocked, autocorrect off, grows for multi-line)
 - [x] Debounced live compile (~40 ms), match detection, auto-advance, success flash
 - [x] Per-expression timer starting on first keystroke
-- [x] Live preview toggle (persisted)
+- [x] Live preview (always on; toggle and score multiplier removed)
 
 ### M3 Generator
 - [x] mulberry32 RNG seeded from a string
@@ -118,7 +118,7 @@ src/
 
 ## 4. Open questions for the owner
 
-- Preview multiplier (0.8) and all scoring constants are provisional, to tune after playtesting.
+- All scoring constants are provisional, to tune after playtesting.
 - Item time starts at the first input event. An IME or autocomplete that inserts several characters
   in one event can make `timeMs` near 0 (speed capped at 3x). Acceptable for v1; a server-side
   plausibility check (min ms per char) belongs to the leaderboard phase.

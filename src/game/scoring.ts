@@ -12,7 +12,6 @@ export type ItemMetrics = {
   timeMs: number;
   deletions: number;
   failedCompiles: number;
-  previewOn: boolean;
   skipped: boolean;
   targetSourceLength: number;
 };
@@ -23,7 +22,7 @@ export type ItemMetrics = {
  *   base    = tierBase[tier] + lengthBonus × length
  *   speed   = clamp(parTime / timeMs, 0, speedCap), parTime = parPerChar × length
  *   penalty = deletionPenalty × deletions + failedCompilePenalty × failedCompiles
- *   score   = max(0, (base × speed − penalty) × previewMul), rounded to 1 decimal
+ *   score   = max(0, base × speed − penalty), rounded to 1 decimal
  *
  * @param m - recorded metrics for the item
  * @param config - scoring constants (defaults to SCORING_CONFIG)
@@ -36,8 +35,7 @@ export function scoreItem(m: ItemMetrics, config: ScoringConfig = SCORING_CONFIG
   // Guard timeMs=0 (theoretically impossible, but a zero division would give Infinity).
   const speed = clamp(parTime / Math.max(m.timeMs, 1), 0, config.speedCap);
   const penalty = config.deletionPenalty * m.deletions + config.failedCompilePenalty * m.failedCompiles;
-  const previewMul = m.previewOn ? config.previewMultiplier : 1;
-  const raw = Math.max(0, (base * speed - penalty) * previewMul);
+  const raw = Math.max(0, base * speed - penalty);
   return Math.round(raw * 10) / 10;
 }
 

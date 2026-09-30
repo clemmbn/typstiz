@@ -1,5 +1,5 @@
 /**
- * Game screen: HUD (clock, solved, score, item timer), target, input, optional live preview.
+ * Game screen: HUD (clock, solved, score, item timer), target, input, live preview.
  *
  * Split in two:
  * - `GameScreen` holds run-level UI (HUD, buzzer timer, success flash).
@@ -194,12 +194,10 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
         {invalid ? 'does not compile yet' : ' '}
       </p>
 
-      {settings.previewOn && (
-        <section className="stage preview" aria-label="Live preview">
-          <span className="stage-label">preview</span>
-          <MathView render={preview} scale={MATH_SCALE} label="Preview of your input" />
-        </section>
-      )}
+      <section className="stage preview" aria-label="Live preview">
+        <span className="stage-label">preview</span>
+        <MathView render={preview} scale={MATH_SCALE} label="Preview of your input" />
+      </section>
 
       <div className="controls">
         <button type="button" onClick={doSkip}>Skip <kbd>Tab</kbd></button>

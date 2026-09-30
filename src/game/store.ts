@@ -104,7 +104,6 @@ function toItemRecord(run: RunState, outcome: ItemOutcome, skipped: boolean): It
   const metrics = {
     ...outcome,
     tier: expr.tier,
-    previewOn: run.settings.previewOn,
     skipped,
     targetSourceLength: source.length,
   };
@@ -215,7 +214,6 @@ export const useGame = create<GameStore>((set, get) => {
         durationSec: settings.mode === 'timed' ? settings.durationSec : undefined,
         difficulty: settings.difficulty,
         seed: run.seed,
-        previewOn: settings.previewOn,
         score: scoreRun(run.items),
         items: run.items,
         appVersion: __APP_VERSION__,

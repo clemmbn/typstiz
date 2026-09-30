@@ -13,7 +13,6 @@ export const DEFAULT_SETTINGS: GameSettings = {
   mode: 'timed',
   difficulty: 'easy',
   durationSec: 60,
-  previewOn: true,
   seed: '',
 };
 
@@ -22,7 +21,9 @@ export function loadSettings(): GameSettings {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw), seed: '' };
+    // Drop keys from older versions (e.g. the removed `previewOn` toggle) so they don't linger.
+    const { previewOn: _legacyPreviewOn, ...stored } = JSON.parse(raw);
+    return { ...DEFAULT_SETTINGS, ...stored, seed: '' };
   } catch {
     return DEFAULT_SETTINGS;
   }

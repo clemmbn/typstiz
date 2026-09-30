@@ -8,13 +8,12 @@ const base: ItemMetrics = {
   timeMs: 4000,
   deletions: 0,
   failedCompiles: 0,
-  previewOn: false,
   skipped: false,
   targetSourceLength: 10,
 };
 
 // Round numbers make hand-computed expectations easy to read.
-const cfg: ScoringConfig = { ...SCORING_CONFIG, tierBase: { easy: 10, medium: 20, hard: 30 }, lengthBonus: 1, parPerChar: 400, speedCap: 3, deletionPenalty: 0.5, failedCompilePenalty: 1, previewMultiplier: 0.8 };
+const cfg: ScoringConfig = { ...SCORING_CONFIG, tierBase: { easy: 10, medium: 20, hard: 30 }, lengthBonus: 1, parPerChar: 400, speedCap: 3, deletionPenalty: 0.5, failedCompilePenalty: 1 };
 
 describe('scoreItem', () => {
   it('matches the formula at par time', () => {
@@ -34,10 +33,6 @@ describe('scoreItem', () => {
   it('applies small penalties', () => {
     // 20 - 0.5*4 - 1*2 = 16
     expect(scoreItem({ ...base, deletions: 4, failedCompiles: 2 }, cfg)).toBe(16);
-  });
-
-  it('applies the preview multiplier', () => {
-    expect(scoreItem({ ...base, previewOn: true }, cfg)).toBe(16);
   });
 
   it('never goes negative', () => {

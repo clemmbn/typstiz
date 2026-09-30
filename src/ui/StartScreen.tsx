@@ -1,5 +1,5 @@
 /**
- * Start screen: mode, duration, difficulty, language, live preview toggle, optional seed.
+ * Start screen: mode, duration, difficulty, language, optional seed.
  * Enter starts a run from anywhere on the page once the engine is ready.
  */
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
@@ -65,7 +65,14 @@ export function StartScreen() {
           <Segmented
             value={settings.durationSec}
             onChange={set('durationSec')}
-            options={[{ value: 30, label: '30 s' }, { value: 60, label: '60 s' }, { value: 120, label: '120 s' }]}
+            options={[
+              { value: 30, label: '30 s' },
+              { value: 60, label: '60 s' },
+              { value: 120, label: '120 s' },
+              { value: 180, label: '180 s' },
+              { value: 300, label: '300 s' },
+              { value: 600, label: '600 s' },
+            ]}
           />
         </Field>
       )}
@@ -88,14 +95,6 @@ export function StartScreen() {
           value={settings.language}
           onChange={set('language')}
           options={[{ value: 'typst', label: 'Typst' }, { value: 'latex', label: 'LaTeX (soon)', disabled: true }]}
-        />
-      </Field>
-
-      <Field label="Live preview">
-        <Segmented
-          value={settings.previewOn}
-          onChange={set('previewOn')}
-          options={[{ value: true, label: 'On' }, { value: false, label: 'Off (+25% score)' }]}
         />
       </Field>
 

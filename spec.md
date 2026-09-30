@@ -39,7 +39,7 @@ Two orthogonal choices at game start: **mode** and **difficulty**.
 
 | Mode | Behavior |
 |---|---|
-| **Timed run** | Global countdown (selectable: 30 s, 60 s, 120 s; default 60 s). As many expressions as possible. Run ends when the clock hits zero. |
+| **Timed run** | Global countdown (selectable: 30 s, 60 s, 120 s, 180 s, 300 s, 600 s; default 60 s). As many expressions as possible. Run ends when the clock hits zero. |
 | **Zen** | No global clock, no pressure. Player quits whenever they want. Per-expression time and score are still tracked, but the run is not eligible for best-score records (or is recorded in a separate bucket). |
 
 ### 4.2 Difficulty
@@ -52,7 +52,7 @@ Two orthogonal choices at game start: **mode** and **difficulty**.
 
 ## 5. Core game loop
 
-1. Start screen: pick mode, difficulty, options (live preview toggle with live preview on by default, timed duration). Optional seed input (for reproducible runs).
+1. Start screen: pick mode, difficulty, options (timed duration). Optional seed input (for reproducible runs).
 2. Countdown 3, 2, 1. In timed mode the global clock starts at "go".
 3. An expression is shown, rendered as SVG, centered and large.
 4. The input field is focused automatically. **The per-expression timer starts on the first keystroke.**
@@ -63,7 +63,7 @@ Two orthogonal choices at game start: **mode** and **difficulty**.
 
 Other controls:
 - **Skip** (key: `Tab` or `Ctrl+Enter`, choose one): next expression, scores 0 for that item, counts as a skip in stats. Timed mode may apply a small time penalty (configurable, default 0).
-- **Live preview toggle**: shows the render of the player's current input next to or under the target. Setting persists.
+- **Live preview**: always on, cannot be disabled. Shows the render of the player's current input under the target.
 - Pasting is disabled in the input (block `paste` and drop events). Autocorrect, autocapitalize and spellcheck off.
 
 ## 6. Answer verification
@@ -134,7 +134,6 @@ Example problems from existing LaTeX problem sets live in `assets/latex-problems
 - `keystrokes`: total input events that inserted characters.
 - `deletions`: number of characters removed (compute from input diffs, so held-down backspace and selection deletes are counted correctly).
 - `failedCompiles`: number of compile errors observed after an input state has **settled** (idle for about 400 ms). Do not count every transient error while typing.
-- `previewOn`: whether live preview was enabled.
 - `skipped`: boolean.
 - `targetSourceLength`: length of the reference source (used to normalize difficulty).
 
@@ -147,8 +146,7 @@ base       = tierBase[tier] + lengthBonus * targetSourceLength
 speed      = clamp(parTime / timeMs, 0, speedCap)        // time has the highest weight
              where parTime = parPerChar * targetSourceLength
 penalty    = deletionPenalty * deletions + failedCompilePenalty * failedCompiles
-previewMul = previewOn ? 0.8 : 1.0                        // preview makes it easier, so it should pay less
-itemScore  = max(0, (base * speed - penalty) * previewMul)
+itemScore  = max(0, base * speed - penalty)
 ```
 
 - Time carries the largest weight by design. Penalties are intentionally small.
@@ -160,7 +158,7 @@ itemScore  = max(0, (base * speed - penalty) * previewMul)
 ## 9. UI / UX
 
 - Single-page app, three screens: **Start**, **Game**, **Results**. Plus a small **Stats / Best scores** view.
-- Game screen layout: target (large, centered) on top, input below, optional preview under the input, HUD with timer, solved count and running score.
+- Game screen layout: target (large, centered) on top, input below, preview under the input, HUD with timer, solved count and running score.
 - The target and preview render on the same background with the same scale so they can be visually compared.
 - Input is a monospace textarea (single line by default, grows for multi-line expressions such as matrices). Keep the door open for CodeMirror later, behind a small `InputField` component.
 - Keyboard-first: the whole game must be playable without the mouse after starting.
@@ -219,7 +217,6 @@ type RunRecord = {
   durationSec?: number;         // timed only
   difficulty: 'easy' | 'medium' | 'hard' | 'random';
   seed: string;
-  previewOn: boolean;
   score: number;
   items: ItemRecord[];          // per-expression raw metrics, enough to recompute the score
   appVersion: string;
@@ -240,7 +237,7 @@ type RunRecord = {
 ## 12. Milestones
 
 1. **Skeleton:** Vite project, `MathEngine` interface, Typst engine wrapper rendering a hard-coded expression, fonts verified. Equivalence acceptance tests (section 6.1) passing.
-2. **Core loop:** input, live compile, match detection, timer, auto-advance, live preview toggle.
+2. **Core loop:** input, live compile, match detection, timer, auto-advance, live preview (always on).
 3. **Generator:** seedable RNG, templates for the three tiers, generation and compile test suite, `random` mix.
 4. **Modes and scoring:** timed and zen modes, metrics capture, scoring module with tests, results screen.
 5. **Persistence:** `ScoreRepository` with the localStorage implementation, best scores view.
@@ -254,7 +251,6 @@ type RunRecord = {
 - Timed run ends exactly when the clock hits zero and produces a results screen.
 - Same seed and settings produce the same expression sequence.
 - Every generated expression compiles.
-- Preview toggle works and persists.
 - Scores are computed by a pure function from recorded metrics, covered by unit tests.
 - Runs and best scores persist across reloads via `ScoreRepository`.
 - `pnpm build` (or npm equivalent) produces a static bundle that works when served from any static host.
@@ -265,7 +261,6 @@ type RunRecord = {
 - **typst.ts API drift:** verify current version and loading model against its docs, pin the version.
 - **Font loading:** if New Computer Modern is not picked up, comparisons silently break. Add a startup self-check that fails loudly.
 - **Scoring balance:** all constants are provisional. Plan a tuning pass after playtesting.
-- **Preview multiplier:** whether preview-on should reduce score, and by how much, is a design decision to confirm after playtesting.
 - **Hard tier length:** long multi-line expressions may need a multi-line input and a different par time model.
 
 ## 15. Your role

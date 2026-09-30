@@ -9,14 +9,13 @@ import type { Difficulty } from '../generator/generate';
 import type { Tier } from '../generator/types';
 
 export type Mode = 'timed' | 'zen';
-export type TimedDuration = 30 | 60 | 120;
+export type TimedDuration = 30 | 60 | 120 | 180 | 300 | 600;
 
 export type GameSettings = {
   language: LanguageId;
   mode: Mode;
   difficulty: Difficulty;
   durationSec: TimedDuration;
-  previewOn: boolean;
   /** Empty string means "generate a random seed at start". */
   seed: string;
 };
@@ -31,7 +30,6 @@ export type ItemRecord = {
   keystrokes: number;
   deletions: number;
   failedCompiles: number;
-  previewOn: boolean;
   skipped: boolean;
   targetSourceLength: number;
   score: number;
@@ -46,7 +44,6 @@ export type RunRecord = {
   durationSec?: number;
   difficulty: Difficulty;
   seed: string;
-  previewOn: boolean;
   score: number;
   items: ItemRecord[];
   appVersion: string;

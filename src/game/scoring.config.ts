@@ -17,8 +17,6 @@ export type ScoringConfig = {
   deletionPenalty: number;
   /** Points removed per settled compile error. Kept small by design. */
   failedCompilePenalty: number;
-  /** Score multiplier when live preview is on (preview makes it easier). */
-  previewMultiplier: number;
   /** Seconds removed from the timed-mode clock per skip (spec default 0). */
   skipTimePenaltySec: number;
 };
@@ -30,6 +28,5 @@ export const SCORING_CONFIG: ScoringConfig = {
   speedCap: 3,
   deletionPenalty: 0.5,
   failedCompilePenalty: 1,
-  previewMultiplier: 0.8,
   skipTimePenaltySec: 0,
 };
