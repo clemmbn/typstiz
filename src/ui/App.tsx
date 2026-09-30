@@ -46,7 +46,7 @@ function GithubIcon() {
 
 export function App() {
   const screen = useGame((s) => s.screen);
-  const { goTo } = useGame.getState();
+  const { goTo, abandonRun } = useGame.getState();
   const [theme, setTheme] = useState(currentTheme);
   const inRun = screen === 'game' || screen === 'countdown';
 
@@ -54,7 +54,17 @@ export function App() {
     <div className="app">
       <header className="header">
         <h1 className="logo">
-          <button type="button" className="link" onClick={() => !inRun && goTo('start')} tabIndex={inRun ? -1 : 0}>
+          {/* Mid-run the logo abandons the run (nothing saved) and returns to the menu. */}
+          <button
+            type="button"
+            className="link"
+            onClick={() => {
+              if (!inRun) return goTo('start');
+              console.info('[ui] logo clicked mid-run: abandoning run');
+              abandonRun();
+            }}
+            tabIndex={inRun ? -1 : 0}
+          >
             typstiz
           </button>
         </h1>
