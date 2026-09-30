@@ -49,10 +49,12 @@ browser (URL fetch) and in Vitest (fs read).
 src/
   engines/types.ts              MathEngine interface, RenderResult
   engines/typst/                TypstEngine, prelude, normalize, font self-check
+  engines/latex/                KatexEngine, normalize (HTML comparison key), browser CSS/fonts
   generator/rng.ts              mulberry32 + string seed hashing
   generator/slots.ts            slot specs and sampling
-  generator/templates/typst.ts  templates per tier (with optional latex field)
+  generator/templates/bank.ts   templates per tier, one `typst` and one `latex` source each
   generator/generate.ts         seeded sequence generator with degeneracy guards
+  game/hints.ts, hints.latex.ts symbol hint dictionaries per language
   game/types.ts                 settings, item records, run record
   game/metrics.ts               per-expression tracker (keystrokes, deletions via diffs, settled errors)
   game/scoring.config.ts        all tunable constants
@@ -106,8 +108,28 @@ src/
 - [x] Static deploy notes (Cloudflare Pages / Netlify / Vercel), long-cache headers for hashed assets
 - [x] Docker image (nginx, precompressed assets) for Coolify, CD job in CI triggering the Coolify deploy webhook
 
+### M7 LaTeX mode (KaTeX)
+- [x] `KatexEngine` behind `MathEngine`: display mode, HTML output, `trust: false`, refused
+      commands (rendered in `errorColor` instead of throwing) mapped to compile errors
+- [x] Comparison key: canonical KaTeX HTML (inert atom classes dropped, bare wrapper spans from
+      `{...}` groups unwrapped except under `>`-combinator parents, adjacent plain text spans
+      merged), so `x^2` ≡ `x^{2}`, `\frac ab` ≡ `\frac{a}{b}`, `{a}{b}` ≡ `ab`
+- [x] Self-check at init (reference renders, two spellings compare equal); fonts preloaded in the
+      browser so targets never flash in a fallback font
+- [x] Lazy loading: KaTeX JS, CSS and fonts only load when LaTeX is selected; a returning LaTeX
+      player never downloads the Typst WASM
+- [x] `latex` source on every template; slot values spelled per language; same RNG stream, so a
+      seed gives the same mathematics in both languages and Typst sequences are unchanged
+      (fingerprint test)
+- [x] Compile test of the generated LaTeX bank; placeholder parity test; `\cmd{slot}` guard
+- [x] LaTeX hint dictionary with coverage test
+- [x] UI: language picker enabled, engine reloads on switch, language shown in results and stats,
+      KaTeX sized to match Typst glyphs and shrunk to fit narrow screens
+- [ ] Playtest: LaTeX sources are longer than Typst ones, so the length-based par time and bonus
+      are more generous per expression. Scores are bucketed per language, so this only matters for
+      tuning, not fairness.
+
 ### Later
-- LaTeX mode via KaTeX (`engines/latex/`, `latex` fields on templates)
 - Remote leaderboard (`RemoteScoreRepository`, server-side recompute from seed + metrics)
 - Strict source-match rule set (spec 6.2)
 

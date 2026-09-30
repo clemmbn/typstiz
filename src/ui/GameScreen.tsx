@@ -27,7 +27,7 @@ import { ItemMetricsTracker } from '../game/metrics';
 import { SCORING_CONFIG } from '../game/scoring.config';
 import { registerItemProbe, useGame, type ItemOutcome, type Target } from '../game/store';
 import type { GameSettings } from '../game/types';
-import { docFor } from './docs';
+import { docFor, LANGUAGE_NAMES } from './docs';
 import { InputField } from './InputField';
 import { MathView } from './MathView';
 
@@ -200,7 +200,7 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
    */
   const doHint = () => {
     if (done.current) return;
-    const next = availableHints(target.expr.source[settings.language] ?? '', value, revealed.map((h) => h.token))[0];
+    const next = availableHints(target.expr.source[settings.language], value, revealed.map((h) => h.token), settings.language)[0];
     if (!next) {
       console.info('[game-screen] hint requested but none left');
       return;
@@ -212,7 +212,7 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
     console.info('[game-screen] hint revealed', { token: next.token, hintsUsed: tracker.current.hints });
   };
 
-  const hintsLeft = availableHints(target.expr.source[settings.language] ?? '', value, revealed.map((h) => h.token)).length;
+  const hintsLeft = availableHints(target.expr.source[settings.language], value, revealed.map((h) => h.token), settings.language).length;
 
   const doc = docFor(settings.language);
 
@@ -237,7 +237,14 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
 
   return (
     <>
-      <InputField ref={inputRef} value={value} onEdit={onEdit} onKeyDown={onKeyDown} invalid={invalid} />
+      <InputField
+        ref={inputRef}
+        value={value}
+        onEdit={onEdit}
+        onKeyDown={onKeyDown}
+        invalid={invalid}
+        languageName={LANGUAGE_NAMES[settings.language]}
+      />
       {revealed.length > 0 && (
         <ul className="hints" aria-label="Hints">
           {revealed.map((h) => (

@@ -20,10 +20,12 @@ type Props = {
   onKeyDown?(e: KeyboardEvent<HTMLTextAreaElement>): void;
   invalid?: boolean;
   disabled?: boolean;
+  /** Display name of the math language being typed (placeholder and accessible label). */
+  languageName?: string;
 };
 
 export const InputField = forwardRef<HTMLTextAreaElement, Props>(function InputField(
-  { value, onEdit, onKeyDown, invalid = false, disabled = false },
+  { value, onEdit, onKeyDown, invalid = false, disabled = false, languageName = 'Typst' },
   ref,
 ) {
   const rows = Math.max(1, value.split('\n').length);
@@ -35,12 +37,12 @@ export const InputField = forwardRef<HTMLTextAreaElement, Props>(function InputF
     <textarea
       ref={ref}
       className={`source-input ${invalid ? 'invalid' : ''}`}
-      aria-label="Your Typst source"
+      aria-label={`Your ${languageName} source`}
       aria-invalid={invalid}
       value={value}
       rows={rows}
       disabled={disabled}
-      placeholder="type the Typst source…"
+      placeholder={`type the ${languageName} source…`}
       autoComplete="off"
       autoCorrect="off"
       autoCapitalize="off"

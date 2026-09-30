@@ -2,7 +2,8 @@
  * Engine registry: one lazily created `MathEngine` per language.
  *
  * Engines are loaded with dynamic `import()` so a language's code and WASM are only fetched when
- * needed (spec §11). Adding LaTeX later means adding one case here.
+ * needed (spec §11): a Typst player never downloads KaTeX, and a LaTeX player never downloads the
+ * Typst WASM unless they switch languages.
  */
 import type { LanguageId, MathEngine } from './types';
 
@@ -35,7 +36,14 @@ async function loadEngine(language: LanguageId): Promise<MathEngine> {
       await engine.init();
       return engine;
     }
-    case 'latex':
-      throw new Error('LaTeX mode is not available yet');
+    case 'latex': {
+      const [{ KatexEngine }, { loadKatexAssets }] = await Promise.all([
+        import('./latex/KatexEngine'),
+        import('./latex/browserSetup'),
+      ]);
+      const engine = new KatexEngine(loadKatexAssets);
+      await engine.init();
+      return engine;
+    }
   }
 }

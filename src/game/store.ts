@@ -181,20 +181,28 @@ export const useGame = create<GameStore>((set, get) => {
     async initEngine() {
       const { language } = get().settings;
       set({ engineStatus: 'loading', engineError: null });
+      // The player may switch language while this engine loads; only the current one's outcome
+      // may update the status.
+      const stillCurrent = () => get().settings.language === language;
       try {
         await getEngine(language);
         console.info(`${LOG} engine ready: ${language}`);
-        set({ engineStatus: 'ready' });
+        if (stillCurrent()) set({ engineStatus: 'ready' });
       } catch (err) {
-        console.error(`${LOG} engine failed to load`, err);
-        set({ engineStatus: 'error', engineError: err instanceof Error ? err.message : String(err) });
+        console.error(`${LOG} engine failed to load: ${language}`, err);
+        if (stillCurrent()) set({ engineStatus: 'error', engineError: err instanceof Error ? err.message : String(err) });
       }
     },
 
     updateSettings(patch) {
-      const settings = { ...get().settings, ...patch };
+      const previous = get().settings;
+      const settings = { ...previous, ...patch };
       saveSettings(settings);
       set({ settings });
+      if (settings.language !== previous.language) {
+        console.info(`${LOG} language switched to ${settings.language}`);
+        void get().initEngine();
+      }
     },
 
     async startRun() {
