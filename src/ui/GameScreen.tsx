@@ -13,12 +13,18 @@
  * - Match detection: a render equivalent to the target solves the item; item time is measured
  *   at the *input event* that produced the matching value, so debounce latency isn't charged.
  *
- * Keys: Tab = skip, Esc = end session (zen) / quit (timed).
+ * Hints: Shift+Tab (or the button) reveals the next symbol hint for the target, costing
+ * `hintPenalty` points each; revealed hints stay on screen until the item ends. The first hint
+ * also starts the item timer, so reading hints before typing is not free thinking time.
+ *
+ * Keys: Tab = skip, Shift+Tab = hint, Esc = end session (zen) / quit (timed).
  */
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { getEngine } from '../engines/registry';
 import type { RenderResult } from '../engines/types';
+import { availableHints, type Hint } from '../game/hints';
 import { ItemMetricsTracker } from '../game/metrics';
+import { SCORING_CONFIG } from '../game/scoring.config';
 import { registerItemProbe, useGame, type ItemOutcome, type Target } from '../game/store';
 import type { GameSettings } from '../game/types';
 import { InputField } from './InputField';
@@ -94,6 +100,7 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
   const [value, setValue] = useState('');
   const [preview, setPreview] = useState<RenderResult | null>(null);
   const [invalid, setInvalid] = useState(false);
+  const [revealed, setRevealed] = useState<Hint[]>([]);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const tracker = useRef(new ItemMetricsTracker());
@@ -117,7 +124,7 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
   /** Snapshot of the tracker as the store expects it. */
   const outcome = useCallback((timeMs: number): ItemOutcome => {
     const t = tracker.current;
-    return { timeMs: Math.round(timeMs), keystrokes: t.keystrokes, deletions: t.deletions, failedCompiles: t.failedCompiles };
+    return { timeMs: Math.round(timeMs), keystrokes: t.keystrokes, deletions: t.deletions, failedCompiles: t.failedCompiles, hints: t.hints };
   }, []);
 
   /**
@@ -186,6 +193,26 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
     skip(outcome(tracker.current.elapsed(performance.now())));
   };
 
+  /**
+   * Reveal the next hint (Shift+Tab / button). Counts one hint against the item and starts the
+   * item timer if the player has not typed yet. No-op once every hint is showing.
+   */
+  const doHint = () => {
+    if (done.current) return;
+    const next = availableHints(target.expr.source[settings.language] ?? '', value, revealed.map((h) => h.token))[0];
+    if (!next) {
+      console.info('[game-screen] hint requested but none left');
+      return;
+    }
+    const now = performance.now();
+    if (tracker.current.startedAt === null) onStarted(now);
+    tracker.current.onHint(now);
+    setRevealed((r) => [...r, next]);
+    console.info('[game-screen] hint revealed', { token: next.token, hintsUsed: tracker.current.hints });
+  };
+
+  const hintsLeft = availableHints(target.expr.source[settings.language] ?? '', value, revealed.map((h) => h.token)).length;
+
   const quit = () => (settings.mode === 'zen' ? void endRun() : abandonRun());
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -194,13 +221,24 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
     // register its own window keydown listener before this same event reaches window.
     e.preventDefault();
     e.stopPropagation();
-    if (e.key === 'Tab') doSkip();
+    if (e.key === 'Tab') (e.shiftKey ? doHint : doSkip)();
     else quit();
   };
 
   return (
     <>
       <InputField ref={inputRef} value={value} onEdit={onEdit} onKeyDown={onKeyDown} invalid={invalid} />
+      {revealed.length > 0 && (
+        <ul className="hints" aria-label="Hints">
+          {revealed.map((h) => (
+            <li key={h.token}>
+              use <code>{h.token}</code> for <span className="hint-shows">{h.shows}</span>
+              {h.note && <span className="muted"> ({h.note})</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+
       <p className="input-status" aria-live="polite">
         {invalid ? 'does not compile yet' : ' '}
       </p>
@@ -212,6 +250,9 @@ function ItemBoard({ target, settings, onStarted, onSolved }: ItemBoardProps) {
 
       <div className="controls">
         <button type="button" onClick={doSkip}>Skip <kbd>Tab</kbd></button>
+        <button type="button" onClick={doHint} disabled={hintsLeft === 0} title={`Costs ${SCORING_CONFIG.hintPenalty} points`}>
+          Hint <kbd>Shift+Tab</kbd>
+        </button>
         <button type="button" onClick={quit}>
           {settings.mode === 'zen' ? 'End session' : 'Quit'} <kbd>Esc</kbd>
         </button>

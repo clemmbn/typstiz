@@ -36,6 +36,7 @@ export class ItemMetricsTracker {
   keystrokes = 0;
   deletions = 0;
   failedCompiles = 0;
+  hints = 0;
   private lastFailedValue: string | null = null;
 
   /**
@@ -49,6 +50,15 @@ export class ItemMetricsTracker {
     const { inserted, removed } = diffEdit(prev, next);
     if (inserted > 0) this.keystrokes++;
     this.deletions += removed;
+  }
+
+  /**
+   * Record one revealed hint. Also starts the item clock, so hints can't be read for free.
+   * @param now - event timestamp in ms
+   */
+  onHint(now: number): void {
+    if (this.startedAt === null) this.startedAt = now;
+    this.hints++;
   }
 
   /**

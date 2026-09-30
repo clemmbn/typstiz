@@ -17,6 +17,8 @@ export type ScoringConfig = {
   deletionPenalty: number;
   /** Points removed per settled compile error. Kept small by design. */
   failedCompilePenalty: number;
+  /** Points removed per hint revealed. Meant to sting a little: hints are for learning. */
+  hintPenalty: number;
   /** Seconds removed from the timed-mode clock per skip (spec default 0). */
   skipTimePenaltySec: number;
 };
@@ -28,5 +30,6 @@ export const SCORING_CONFIG: ScoringConfig = {
   speedCap: 3,
   deletionPenalty: 0.5,
   failedCompilePenalty: 1,
+  hintPenalty: 5,
   skipTimePenaltySec: 0,
 };

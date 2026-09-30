@@ -38,6 +38,7 @@ export type ItemOutcome = {
   keystrokes: number;
   deletions: number;
   failedCompiles: number;
+  hints: number;
 };
 
 type RunState = {

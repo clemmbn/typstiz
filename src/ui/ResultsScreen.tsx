@@ -48,7 +48,7 @@ export function ResultsScreen() {
       {run.items.length > 0 && (
         <table className="items">
           <thead>
-            <tr><th>#</th><th>source</th><th>tier</th><th>time</th><th>del</th><th>err</th><th>score</th></tr>
+            <tr><th>#</th><th>source</th><th>tier</th><th>time</th><th>del</th><th>err</th><th>hints</th><th>score</th></tr>
           </thead>
           <tbody>
             {run.items.map((item) => (
@@ -59,6 +59,7 @@ export function ResultsScreen() {
                 <td>{item.skipped ? 'skip' : `${(item.timeMs / 1000).toFixed(1)} s`}</td>
                 <td>{item.deletions}</td>
                 <td>{item.failedCompiles}</td>
+                <td>{item.hints ?? 0}</td>
                 <td>{item.score.toFixed(1)}</td>
               </tr>
             ))}

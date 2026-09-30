@@ -35,6 +35,12 @@ describe('scoreItem', () => {
     expect(scoreItem({ ...base, deletions: 4, failedCompiles: 2 }, cfg)).toBe(16);
   });
 
+  it('charges hintPenalty per hint and treats a missing count as zero', () => {
+    const c = { ...cfg, hintPenalty: 5 };
+    expect(scoreItem({ ...base, hints: 2 }, c)).toBe(10);
+    expect(scoreItem(base, c)).toBe(20);
+  });
+
   it('never goes negative', () => {
     expect(scoreItem({ ...base, timeMs: 1e9, deletions: 1000 }, cfg)).toBe(0);
   });

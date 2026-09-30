@@ -217,6 +217,9 @@ button.link:hover { color: var(--text); }
 .source-input.invalid { border-color: var(--warn); }
 .input-status { margin: -8px 0 0; min-height: 1.5em; font-size: 12px; color: var(--warn); }
 
+.hints { margin: -8px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
+.hint-shows { font-size: 1.2em; color: var(--accent); }
+
 .controls { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* ---------- Results / Stats ---------- */

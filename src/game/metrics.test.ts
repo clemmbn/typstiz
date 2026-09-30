@@ -18,6 +18,14 @@ describe('diffEdit', () => {
 });
 
 describe('ItemMetricsTracker', () => {
+  it('counts hints and starts the clock on the first one', () => {
+    const t = new ItemMetricsTracker();
+    t.onHint(1000);
+    t.onHint(2000);
+    expect(t.hints).toBe(2);
+    expect(t.startedAt).toBe(1000);
+  });
+
   it('starts the timer on the first keystroke', () => {
     const t = new ItemMetricsTracker();
     expect(t.elapsed(500)).toBe(0);

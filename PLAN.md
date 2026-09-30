@@ -89,6 +89,7 @@ src/
 ### M4 Modes and scoring
 - [x] Timed (30/60/120 s) and zen modes, 3-2-1 countdown
 - [x] Skip (Tab), optional time penalty
+- [x] Symbol hints (Shift+Tab / button): `game/hints.ts`, `hintPenalty` points each, `hints` stored per item
 - [x] Metrics capture (keystrokes, deletions from diffs, settled failed compiles)
 - [x] `scoring.config.ts` + pure `scoreItem` / `scoreRun` with tests
 - [x] Results screen with raw stats, restart with one key

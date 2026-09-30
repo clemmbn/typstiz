@@ -12,6 +12,8 @@ export type ItemMetrics = {
   timeMs: number;
   deletions: number;
   failedCompiles: number;
+  /** Hints revealed; absent on runs stored before hints existed. */
+  hints?: number;
   skipped: boolean;
   targetSourceLength: number;
 };
@@ -22,6 +24,7 @@ export type ItemMetrics = {
  *   base    = tierBase[tier] + lengthBonus × length
  *   speed   = clamp(parTime / timeMs, 0, speedCap), parTime = parPerChar × length
  *   penalty = deletionPenalty × deletions + failedCompilePenalty × failedCompiles
+ *             + hintPenalty × hints
  *   score   = max(0, base × speed − penalty), rounded to 1 decimal
  *
  * @param m - recorded metrics for the item
@@ -34,7 +37,10 @@ export function scoreItem(m: ItemMetrics, config: ScoringConfig = SCORING_CONFIG
   const parTime = config.parPerChar * m.targetSourceLength;
   // Guard timeMs=0 (theoretically impossible, but a zero division would give Infinity).
   const speed = clamp(parTime / Math.max(m.timeMs, 1), 0, config.speedCap);
-  const penalty = config.deletionPenalty * m.deletions + config.failedCompilePenalty * m.failedCompiles;
+  const penalty =
+    config.deletionPenalty * m.deletions +
+    config.failedCompilePenalty * m.failedCompiles +
+    config.hintPenalty * (m.hints ?? 0);
   const raw = Math.max(0, base * speed - penalty);
   return Math.round(raw * 10) / 10;
 }

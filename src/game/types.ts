@@ -30,6 +30,8 @@ export type ItemRecord = {
   keystrokes: number;
   deletions: number;
   failedCompiles: number;
+  /** Hints revealed for this item; absent in runs stored before hints existed (read as 0). */
+  hints?: number;
   skipped: boolean;
   targetSourceLength: number;
   score: number;
