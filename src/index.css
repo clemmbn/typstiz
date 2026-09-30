@@ -10,12 +10,12 @@
   --text: #1d1d1b;
   --muted: #6b6a64;
   --border: #dcdad2;
-  --accent: #117f8c;
+  --accent: #246B8F;
   --accent-contrast: #ffffff;
   --success: #2f8a3e;
   --danger: #b3261e;
   --warn: #9a6400;
-  --focus: #117f8c;
+  --focus: #246B8F;
   --radius: 8px;
   color-scheme: light;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -32,12 +32,12 @@
     --text: #ecebe6;
     --muted: #9c9a92;
     --border: #34352f;
-    --accent: #4fc3cf;
+    --accent: #5db0d6;
     --accent-contrast: #0c1a1c;
     --success: #6fcf7c;
     --danger: #ff8a80;
     --warn: #f0b95b;
-    --focus: #4fc3cf;
+    --focus: #5db0d6;
     color-scheme: dark;
   }
 }
@@ -48,12 +48,12 @@
   --text: #ecebe6;
   --muted: #9c9a92;
   --border: #34352f;
-  --accent: #4fc3cf;
+  --accent: #5db0d6;
   --accent-contrast: #0c1a1c;
   --success: #6fcf7c;
   --danger: #ff8a80;
   --warn: #f0b95b;
-  --focus: #4fc3cf;
+  --focus: #5db0d6;
   color-scheme: dark;
 }
 
