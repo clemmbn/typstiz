@@ -51,6 +51,12 @@ export function StartScreen() {
         A math expression appears. Type the <strong>Typst</strong> source that renders it. Any source that
         renders identically counts.
       </p>
+      {/* Reference links: opened in a new tab so an in-progress setup is not lost. */}
+      <p className="refs">
+        Need a hint? <a href="https://typst.app/docs/reference/math/" target="_blank" rel="noopener noreferrer">Typst math docs</a>
+        {' · '}
+        <a href="https://typst.app/docs/reference/symbols/sym/" target="_blank" rel="noopener noreferrer">Symbol list</a>
+      </p>
 
       <Field label="Mode">
         <Segmented
