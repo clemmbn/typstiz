@@ -57,7 +57,7 @@ npm run build      # static bundle in dist/
 | Cloudflare Pages | Build command `npm run build`, output `dist`. Cache headers come from `public/_headers`. |
 | Netlify | Same as above; `_headers` is honored. |
 | Vercel | Framework preset "Vite"; cache headers come from `vercel.json`. |
-| Docker / Coolify | `Dockerfile` builds the bundle and serves it with nginx on port 80 (config in `deploy/nginx.conf`, same cache headers, assets precompressed). Coolify: build pack "Dockerfile", port 80. CI triggers the deploy on `main` via the `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN` repo secrets. |
+| Docker / Coolify | `Dockerfile` builds the bundle and serves it with nginx on port 80 (config in `deploy/nginx.conf`, same cache headers, assets precompressed). Coolify: build pack "Dockerfile", "Ports Exposes" and healthcheck port both `80` (not the default 3000), auto deploy set to "Manual deployments only". CI triggers the deploy on `main` via the `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN` repo secrets. |
 
 Notes:
 - The Typst compiler WASM is ~28 MB (~11 MB gzipped). It has a content-hashed URL and is served
