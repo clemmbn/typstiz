@@ -39,7 +39,7 @@ Two orthogonal choices at game start: **mode** and **difficulty**.
 
 | Mode | Behavior |
 |---|---|
-| **Timed run** | Global countdown (selectable: 30 s, 60 s, 120 s, 180 s, 300 s, 600 s; default 60 s). As many expressions as possible. Run ends when the clock hits zero. |
+| **Timed run** | Global countdown (selectable: 30 s, 60 s, 120 s, 180 s, 300 s; default 60 s). As many expressions as possible. Run ends when the clock hits zero. |
 | **Zen** | No global clock, no pressure. Player quits whenever they want. Per-expression time and score are still tracked, but the run is not eligible for best-score records (or is recorded in a separate bucket). |
 
 ### 4.2 Difficulty

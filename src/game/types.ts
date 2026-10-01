@@ -9,7 +9,7 @@ import type { Difficulty } from '../generator/generate';
 import type { Tier } from '../generator/types';
 
 export type Mode = 'timed' | 'zen';
-export type TimedDuration = 30 | 60 | 120 | 180 | 300 | 600;
+export type TimedDuration = 30 | 60 | 120 | 180 | 300;
 
 export type GameSettings = {
   language: LanguageId;

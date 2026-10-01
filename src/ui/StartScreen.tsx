@@ -83,7 +83,6 @@ export function StartScreen() {
               { value: 120, label: '120 s' },
               { value: 180, label: '180 s' },
               { value: 300, label: '300 s' },
-              { value: 600, label: '600 s' },
             ]}
           />
         </Field>
