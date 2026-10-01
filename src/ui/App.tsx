@@ -1,5 +1,5 @@
 /**
- * App shell: header (title, stats link, theme toggle, GitHub link) and the current screen.
+ * App shell: header (title, stats link, theme toggle, tip + GitHub links) and the current screen.
  * Screen switching is a store field; there is no router (four screens, no deep links needed).
  */
 import { useState } from 'react';
@@ -9,9 +9,9 @@ import { GameScreen } from './GameScreen';
 import { ResultsScreen } from './ResultsScreen';
 import { StartScreen } from './StartScreen';
 import { StatsScreen } from './StatsScreen';
+import { REPO_URL, TIP_URL } from './links';
 import { currentTheme, toggleTheme } from './theme';
 
-const REPO_URL = 'https://github.com/clemmbn/typstiz';
 
 /** Shared props for the 18px stroke/fill icons; they inherit the button's text colour. */
 const iconProps = { width: 18, height: 18, viewBox: '0 0 24 24', 'aria-hidden': true } as const;
@@ -40,6 +40,17 @@ function GithubIcon() {
   return (
     <svg {...iconProps} fill="currentColor">
       <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z" />
+    </svg>
+  );
+}
+
+/** Coffee cup glyph (tip jar link); stroke style matches the sun/moon icons. */
+function CoffeeIcon() {
+  return (
+    <svg {...iconProps} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 8h1a4 4 0 0 1 0 8h-1" />
+      <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" />
+      <path d="M7 2v3M11 2v3M15 2v3" />
     </svg>
   );
 }
@@ -91,7 +102,18 @@ export function App() {
           >
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
-          {/* External link: new tab so an in-progress run/setup is never lost. */}
+          {/* External links: new tab so an in-progress run/setup is never lost. */}
+          <a
+            className="link icon-btn"
+            href={TIP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            tabIndex={inRun ? -1 : 0}
+            title="Buy me some tokens"
+            aria-label="Buy me some tokens"
+          >
+            <CoffeeIcon />
+          </a>
           <a
             className="link icon-btn"
             href={REPO_URL}

@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useGame } from '../game/store';
 import type { ItemRecord } from '../game/types';
 import { LANGUAGE_NAMES } from './docs';
+import { TIP_URL } from './links';
 
 export function ResultsScreen() {
   const run = useGame((s) => s.lastRun)!;
@@ -76,6 +77,12 @@ export function ResultsScreen() {
           {fromStats ? 'Back' : 'Menu'} <kbd>Esc</kbd>
         </button>
       </div>
+
+      {/* Discreet credit + tip link, shown once the player has finished a run. */}
+      <p className="credit">
+        This game was made by Clément (and Claude).{' '}
+        <a href={TIP_URL} target="_blank" rel="noopener noreferrer">Buy me some tokens</a>
+      </p>
     </main>
   );
 }
