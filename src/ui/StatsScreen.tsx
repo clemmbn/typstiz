@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { repository, useGame } from '../game/store';
 import type { RunRecord } from '../game/types';
+import { LANGUAGE_NAMES } from './docs';
 
 export function StatsScreen() {
   const { goTo, viewRun } = useGame.getState();
@@ -42,7 +43,7 @@ export function StatsScreen() {
               <tr key={r.id}>
                 <td>{modeLabel(r)}</td>
                 <td>{r.difficulty}</td>
-                <td>{r.language}</td>
+                <td>{LANGUAGE_NAMES[r.language]}</td>
                 <td>{r.score.toFixed(0)}</td>
                 <td>{r.items.filter((i) => !i.skipped).length}</td>
                 <td>{new Date(r.createdAt).toLocaleDateString()}</td>
@@ -57,12 +58,13 @@ export function StatsScreen() {
         <>
           <h2>Recent runs</h2>
           <table className="items">
-            <thead><tr><th>mode</th><th>difficulty</th><th>score</th><th>seed</th><th>when</th><th></th></tr></thead>
+            <thead><tr><th>mode</th><th>difficulty</th><th>language</th><th>score</th><th>seed</th><th>when</th><th></th></tr></thead>
             <tbody>
               {recent.map((r) => (
                 <tr key={r.id}>
                   <td>{modeLabel(r)}</td>
                   <td>{r.difficulty}</td>
+                  <td>{LANGUAGE_NAMES[r.language]}</td>
                   <td>{r.score.toFixed(0)}</td>
                   <td><code>{r.seed}</code></td>
                   <td>{new Date(r.createdAt).toLocaleString()}</td>
@@ -85,10 +87,12 @@ function modeLabel(r: RunRecord): string {
   return r.mode === 'timed' ? `timed ${r.durationSec}s` : 'zen';
 }
 
-/** Order buckets: timed before zen, then by duration, then difficulty. */
+/** Order buckets: Typst before LaTeX, timed before zen, then by duration, then difficulty. */
 function compareBuckets(a: RunRecord, b: RunRecord): number {
   const order = ['easy', 'medium', 'hard', 'random'];
+  const languages = ['typst', 'latex'];
   return (
+    languages.indexOf(a.language) - languages.indexOf(b.language) ||
     a.mode.localeCompare(b.mode) ||
     (a.durationSec ?? 0) - (b.durationSec ?? 0) ||
     order.indexOf(a.difficulty) - order.indexOf(b.difficulty)

@@ -8,7 +8,12 @@
  *
  * Trade-off: the dictionary is keyed by token, not by template, so new templates get hints for
  * free as long as they reuse known tokens; `hints.test.ts` fails when one introduces a new token.
+ *
+ * LaTeX mode uses its own dictionary and tokenizer (`hints.latex.ts`); `availableHints` dispatches
+ * on the language.
  */
+import type { LanguageId } from '../engines/types';
+import { LATEX_HINTS, tokenizeLatex, typedLatexToken } from './hints.latex';
 
 /** One dictionary entry: what the token renders as, plus an optional plain-words description. */
 export type HintInfo = { shows: string; note?: string };
@@ -107,13 +112,19 @@ export function tokenize(source: string): string[] {
 
 /**
  * Hints that could still be revealed for a target.
- * @param source - target Typst source
+ * @param source - target source in `language`
  * @param typed - what the player has typed so far; tokens already present are skipped, since
  *   the player evidently knows them
  * @param revealed - tokens whose hint is already on screen
+ * @param language - language of `source` (LaTeX hints live in `hints.latex.ts`)
  * @returns unrevealed hints in order of appearance in the target
  */
-export function availableHints(source: string, typed: string, revealed: readonly string[]): Hint[] {
+export function availableHints(source: string, typed: string, revealed: readonly string[], language: LanguageId = 'typst'): Hint[] {
+  if (language === 'latex') {
+    return tokenizeLatex(source)
+      .filter((token) => token in LATEX_HINTS && !revealed.includes(token) && !typedLatexToken(typed, token))
+      .map((token) => ({ token, ...LATEX_HINTS[token] }));
+  }
   return tokenize(source)
     .filter((token) => token in HINTS && !revealed.includes(token) && !typed.includes(token))
     .map((token) => ({ token, ...HINTS[token] }));

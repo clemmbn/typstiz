@@ -5,7 +5,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useGame } from '../game/store';
 import type { GameSettings } from '../game/types';
-import { docFor } from './docs';
+import { docFor, LANGUAGE_NAMES } from './docs';
 
 type Option<T> = { value: T; label: string; disabled?: boolean };
 
@@ -19,6 +19,7 @@ export function StartScreen() {
   const ready = engineStatus === 'ready';
   // Single doc link for the currently selected language.
   const doc = docFor(settings.language);
+  const languageName = LANGUAGE_NAMES[settings.language];
 
   const start = async () => {
     if (!ready || starting) return;
@@ -30,9 +31,13 @@ export function StartScreen() {
     }
   };
 
-  // Keyboard-first: focus Start as soon as the engine is ready, Enter anywhere starts.
+  // Keyboard-first: focus Start as soon as the engine is ready, Enter anywhere starts. Only the
+  // first time: a language switch reloads the engine, and focus must stay on the radio group.
+  const autoFocused = useRef(false);
   useEffect(() => {
-    if (ready) startRef.current?.focus();
+    if (!ready || autoFocused.current) return;
+    autoFocused.current = true;
+    startRef.current?.focus();
   }, [ready]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -51,8 +56,8 @@ export function StartScreen() {
   return (
     <main className="start">
       <p className="tagline">
-        A math expression appears. Type the <strong>Typst</strong> source that renders it. Any source that
-        renders identically counts.
+        A math expression appears. Type the <strong>{languageName}</strong> source that renders it. Any source
+        that renders identically counts.
       </p>
       {/* Reference links: opened in a new tab so an in-progress setup is not lost. */}
       <p className="refs">
@@ -101,7 +106,7 @@ export function StartScreen() {
         <Segmented
           value={settings.language}
           onChange={set('language')}
-          options={[{ value: 'typst', label: 'Typst' }, { value: 'latex', label: 'KaTeX (soon)', disabled: true }]}
+          options={[{ value: 'typst', label: LANGUAGE_NAMES.typst }, { value: 'latex', label: LANGUAGE_NAMES.latex }]}
         />
       </Field>
 
@@ -118,7 +123,9 @@ export function StartScreen() {
       </Field>
 
       <div className="start-actions">
-        {engineStatus === 'loading' && <p className="status">Loading the Typst compiler…</p>}
+        {engineStatus === 'loading' && (
+          <p className="status">{settings.language === 'typst' ? 'Loading the Typst compiler…' : 'Loading KaTeX…'}</p>
+        )}
         {engineStatus === 'error' && (
           <div className="status error" role="alert">
             <p>The math engine failed to load: {engineError}</p>

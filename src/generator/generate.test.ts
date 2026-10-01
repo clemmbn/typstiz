@@ -1,12 +1,14 @@
 /**
  * Generator tests: determinism, guards, tier mix, and spec §7.1 "every generated expression
- * compiles" against the real Typst engine.
+ * compiles" against the real Typst and KaTeX engines.
  */
+import { createHash } from 'node:crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { getNodeTypstEngine } from '../test/nodeTypstEngine';
-import type { TypstEngine } from '../engines/typst/TypstEngine';
+import { KatexEngine } from '../engines/latex/KatexEngine';
+import type { MathEngine } from '../engines/types';
 import { createGenerator, DEGENERATE, fill, GENERATOR_CONFIG, type Difficulty } from './generate';
-import { TEMPLATES } from './templates/typst';
+import { TEMPLATES } from './templates/bank';
 import type { Tier } from './types';
 
 /** Take the first `n` typst sources of a generator. */
@@ -69,6 +71,48 @@ describe('generator determinism and guards', () => {
     expect(counts.hard / 10_000).toBeCloseTo(0.2, 1);
   });
 
+  it('Typst sequences for a seed are unchanged by LaTeX support', () => {
+    // Fingerprints recorded before LaTeX mode existed: stored runs keep replaying the same targets.
+    const expected = {
+      easy: '2c5ab5e5d65c85604c425f236db231a0c3961c8e8e891b9f3c38baf96c54f7c8',
+      medium: '919b58bb1f611def719609ef19857e13f404123667daba14c474db7705b7cf14',
+      hard: '8cb39803c537544cf63a2ba2faf5f0622d6d4f653a05407ae286921f37a125be',
+      random: '1d81c08aa24977f57fc25c108c3ff8dd4dd0c0ecaa6f1282a49cdb331ab2a069',
+    };
+    for (const [d, hash] of Object.entries(expected)) {
+      const gen = createGenerator('baseline-' + d, d as Difficulty);
+      const lines = Array.from({ length: 2000 }, () => {
+        const e = gen.next();
+        return `${e.index}|${e.tier}|${e.templateId}|${e.source.typst}`;
+      });
+      expect(createHash('sha256').update(lines.join('\n')).digest('hex'), d).toBe(hash);
+    }
+  });
+
+  it('every expression has a source in every language', () => {
+    const gen = createGenerator('latex-fill', 'random');
+    for (let i = 0; i < 3000; i++) expect(gen.next().source.latex).toBeTruthy();
+  });
+
+  it('LaTeX and Typst sources of a template use the same placeholders', () => {
+    for (const t of TEMPLATES) {
+      // Derived slot names come from running `derive` on a dummy sample.
+      const dummy = Object.fromEntries(Object.keys(t.slots).map((k) => [k, '2']));
+      const known = new Set([...Object.keys(t.slots), ...Object.keys(t.derive?.(dummy) ?? {})]);
+      const used = (src: string) => [...new Set([...src.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).filter((n) => known.has(n)))].sort();
+      expect(used(t.latex), t.id).toEqual(used(t.typst));
+    }
+  });
+
+  it('LaTeX templates never use a bare slot name as a command argument', () => {
+    // `\mathbb{R}` with a slot `R` would be substituted; slot arguments must be `{{R}}`.
+    for (const t of TEMPLATES) {
+      for (const m of t.latex.matchAll(/\\[A-Za-z]+\{(\w+)\}/g)) {
+        expect(m[1] in t.slots, `${t.id}: ${m[0]}`).toBe(false);
+      }
+    }
+  });
+
   it('fill leaves unknown braces untouched', () => {
     expect(fill('{ {v} in RR }', { v: 'x' })).toBe('{ x in RR }');
   });
@@ -86,16 +130,22 @@ describe('generator determinism and guards', () => {
   });
 });
 
-describe('every generated expression compiles', () => {
-  let engine: TypstEngine;
+describe.each([
+  ['typst', () => getNodeTypstEngine()],
+  ['latex', async () => new KatexEngine()],
+] as const)('every generated expression compiles (%s)', (language, load) => {
+  let engine: MathEngine;
   beforeAll(async () => {
-    engine = await getNodeTypstEngine();
+    engine = await load();
+    await engine.init();
   }, 30_000);
 
   it.each(['easy', 'medium', 'hard'] as const)('%s tier: 3000 expressions across 30 seeds', async (tier) => {
     const failures = new Set<string>();
     for (let s = 0; s < 30; s++) {
-      for (const src of take(`compile-${tier}-${s}`, tier, 100)) {
+      const gen = createGenerator(`compile-${tier}-${s}`, tier);
+      for (let i = 0; i < 100; i++) {
+        const src = gen.next().source[language];
         if (!(await engine.render(src))) failures.add(src);
       }
     }

@@ -200,9 +200,23 @@ button.link:hover { color: var(--text); }
 }
 
 .math { display: grid; place-items: center; max-width: 100%; color: var(--text); }
-.math svg { max-width: 100%; overflow: visible; }
-.math svg [fill='#000'], .math svg [fill='#000000'] { fill: currentColor; }
-.math svg [stroke='#000'], .math svg [stroke='#000000'] { stroke: currentColor; }
+/* Typst renders: one standalone SVG. Scoped to .math-svg so KaTeX's internal SVGs (radicals,
+   big delimiters) keep KaTeX's own sizing. */
+.math-svg svg { max-width: 100%; overflow: visible; }
+.math-svg svg [fill='#000'], .math-svg svg [fill='#000000'] { fill: currentColor; }
+.math-svg svg [stroke='#000'], .math-svg svg [stroke='#000000'] { stroke: currentColor; }
+/* KaTeX renders: HTML sized by font-size (see MathView), which shrinks wide expressions to fit;
+   scrolling is only a fallback for sub-pixel rounding. */
+.math-html {
+  /* Track as wide as the stage; .katex-display centers its content with text-align, and a line
+     too wide for the track starts at the left edge so it can scroll into view. */
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.1em 0;
+}
+.math-html .katex-display { margin: 0; }
 
 .source-input {
   width: 100%;

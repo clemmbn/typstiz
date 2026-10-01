@@ -96,7 +96,7 @@ export class TypstEngine implements MathEngine {
     const res = await this.render('x^2 + frac(a, b)');
     if (!res) throw new Error('Typst self-check failed: reference expression did not compile');
     // Glyphs are emitted as <path d="..."> outlines; no outlines means no usable math font.
-    const glyphCount = (res.svg.match(/<path[^>]*\sd="/g) ?? []).length;
+    const glyphCount = (res.markup.match(/<path[^>]*\sd="/g) ?? []).length;
     console.info(`${LOG} self-check: ${glyphCount} glyph outlines in reference render`);
     if (glyphCount < 3) {
       throw new Error(`Typst self-check failed: math font not loaded (${glyphCount} glyphs)`);
@@ -129,7 +129,7 @@ export class TypstEngine implements MathEngine {
     }
     if (!artifact) return null;
     const raw = await renderer.renderSvg({ format: 'vector', artifactContent: artifact });
-    return { svg: svgForDisplay(raw), key: normalizeSvg(raw) };
+    return { markup: svgForDisplay(raw), format: 'svg', key: normalizeSvg(raw) };
   }
 
   /**

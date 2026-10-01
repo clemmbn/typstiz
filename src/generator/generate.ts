@@ -8,10 +8,18 @@
  * Guards (spec §7.1): generic degeneracy regexes (`x^1`, `frac(1, 1)`, `1/1`), per-template
  * `accept`/`distinct` rules, and no back-to-back repeats. Rejected samples are retried with the
  * same RNG stream, so determinism is preserved.
+ *
+ * Every expression carries a source for every language. Guards run on the Typst spelling; since
+ * templates are parallel, a rejected sample is rejected for all languages, and the RNG stream
+ * (hence the sequence) is the same whichever language is played.
  */
+import type { LanguageId } from '../engines/types';
 import { createRng, type Rng } from './rng';
-import { TEMPLATES } from './templates/typst';
+import { TEMPLATES } from './templates/bank';
 import type { Expression, SlotSpec, SlotValues, Template, Tier } from './types';
+
+/** A sampled slot value, spelled per language. */
+type Spelled = Record<LanguageId, string>;
 
 export type Difficulty = Tier | 'random';
 
@@ -50,25 +58,38 @@ export const DEGENERATE = [
   /(?<![\d.])1\/1(?![\d.])/,
 ];
 
+/** Pool kinds whose LaTeX spelling is a control word (`alpha` → `\alpha`, `sin` → `\sin`). */
+const LATEX_COMMAND_POOLS: ReadonlySet<keyof typeof POOLS> = new Set(['greek', 'fn']);
+
+/** @returns the same text for every language */
+function everywhere(text: string): Spelled {
+  return { typst: text, latex: text };
+}
+
 /**
- * Sample one slot value.
+ * Sample one slot value. Makes exactly the same RNG calls as when only Typst existed, so Typst
+ * sequences for a given seed are unchanged.
  * @param rng - RNG stream
  * @param spec - slot spec
- * @returns value as source text
+ * @returns value as source text, per language
  */
-function sampleSlot(rng: Rng, spec: SlotSpec): string {
+function sampleSlot(rng: Rng, spec: SlotSpec): Spelled {
   switch (spec.kind) {
     case 'int': {
       // Rejection sampling over a small range; `exclude` is expected to be tiny.
       for (;;) {
         const n = rng.int(spec.min, spec.max);
-        if (!spec.exclude?.includes(n)) return String(n);
+        if (!spec.exclude?.includes(n)) return everywhere(String(n));
       }
     }
-    case 'choice':
-      return rng.pick(spec.options);
-    default:
-      return rng.pick(POOLS[spec.kind]);
+    case 'choice': {
+      const option = rng.pick(spec.options);
+      return typeof option === 'string' ? everywhere(option) : option;
+    }
+    default: {
+      const value = rng.pick(POOLS[spec.kind]);
+      return { typst: value, latex: LATEX_COMMAND_POOLS.has(spec.kind) ? `\\${value}` : value };
+    }
   }
 }
 
@@ -83,22 +104,31 @@ export function fill(source: string, values: SlotValues): string {
 }
 
 /**
- * Sample slot values and render one template.
+ * Sample slot values and render one template in every language.
  * @param rng - RNG stream
  * @param t - template
- * @returns concrete Typst source, or null when the sample violates a guard
+ * @returns concrete sources, or null when the sample violates a guard
  */
-function instantiate(rng: Rng, t: Template): string | null {
+function instantiate(rng: Rng, t: Template): Spelled | null {
+  // `values` holds Typst spellings: guards, `accept` and `derive` are written against them.
   const values: SlotValues = {};
-  for (const [name, spec] of Object.entries(t.slots)) values[name] = sampleSlot(rng, spec);
+  const latexValues: SlotValues = {};
+  for (const [name, spec] of Object.entries(t.slots)) {
+    const v = sampleSlot(rng, spec);
+    values[name] = v.typst;
+    latexValues[name] = v.latex;
+  }
   if (t.distinct) {
     const picked = t.distinct.map((n) => values[n]);
     if (new Set(picked).size !== picked.length) return null;
   }
   if (t.accept && !t.accept(values)) return null;
-  Object.assign(values, t.derive?.(values));
-  const out = fill(t.typst, values);
-  return DEGENERATE.some((re) => re.test(out)) ? null : out;
+  const derived = t.derive?.(values);
+  Object.assign(values, derived);
+  Object.assign(latexValues, derived);
+  const typst = fill(t.typst, values);
+  if (DEGENERATE.some((re) => re.test(typst))) return null;
+  return { typst, latex: fill(t.latex, latexValues) };
 }
 
 /**
@@ -147,15 +177,16 @@ export function createGenerator(
       const tier = pickTier(rng, difficulty, config.randomMix);
       const pool = byTier[tier];
       let template = pool[0];
-      let source: string | null = null;
+      let source: Spelled | null = null;
       // Last sample that passed the guards but repeated the previous expression; used only
       // if every attempt fails, which should never happen with a healthy bank.
-      let fallback: string | null = null;
+      let fallback: Spelled | null = null;
       for (let attempt = 0; attempt < config.maxAttempts && source === null; attempt++) {
         template = rng.pick(pool);
         const candidate = instantiate(rng, template);
         if (candidate === null) continue;
-        if (candidate === previous) fallback = candidate;
+        // Repeats are judged on the Typst spelling, the language-independent identity.
+        if (candidate.typst === previous) fallback = candidate;
         else source = candidate;
       }
       if (source === null) {
@@ -163,8 +194,8 @@ export function createGenerator(
         if (fallback === null) throw new Error(`Generator could not produce a ${tier} expression`);
         source = fallback;
       }
-      previous = source;
-      return { index: index++, tier, templateId: template.id, source: { typst: source } };
+      previous = source.typst;
+      return { index: index++, tier, templateId: template.id, source };
     },
   };
 }

@@ -1,7 +1,7 @@
 /**
  * Math engine contract.
  *
- * The game only ever talks to a `MathEngine`; it never imports Typst (or, later, KaTeX) directly.
+ * The game only ever talks to a `MathEngine`; it never imports Typst or KaTeX directly.
  * Adding a new language means implementing this interface and adding the matching template field.
  *
  * Constraint: `render` must be deterministic. Two sources that look the same must produce results
@@ -13,7 +13,9 @@ export type LanguageId = 'typst' | 'latex';
 /** Output of a successful render. */
 export type RenderResult = {
   /** Markup that can be injected into the DOM for display. */
-  svg: string;
+  markup: string;
+  /** What `markup` is: a standalone SVG (Typst) or KaTeX HTML. Decides how the view scales it. */
+  format: 'svg' | 'html';
   /** Canonical comparison key: two renders are equivalent iff their keys are equal. */
   key: string;
 };

@@ -6,6 +6,7 @@
 import { useEffect } from 'react';
 import { useGame } from '../game/store';
 import type { ItemRecord } from '../game/types';
+import { LANGUAGE_NAMES } from './docs';
 
 export function ResultsScreen() {
   const run = useGame((s) => s.lastRun)!;
@@ -32,7 +33,8 @@ export function ResultsScreen() {
   return (
     <main className="results">
       <p className="results-mode">
-        {run.mode === 'timed' ? `${run.durationSec} s timed` : 'zen'} · {run.difficulty} · seed <code>{run.seed}</code>
+        {LANGUAGE_NAMES[run.language]} · {run.mode === 'timed' ? `${run.durationSec} s timed` : 'zen'} · {run.difficulty} · seed{' '}
+        <code>{run.seed}</code>
       </p>
       <p className="big-score">{run.score.toFixed(0)}</p>
       {isBest && <p className="badge">new best</p>}
