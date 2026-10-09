@@ -88,6 +88,10 @@ Notes:
 Inspired by [TypeLaTeX](https://www.typelatex.com/) and [Texnique](https://texnique.xyz/). Typstiz brings the same
 game to [Typst](https://typst.app).
 
+The idea builds on the r/LaTeX post
+[Get faster at writing LaTeX](https://www.reddit.com/r/LaTeX/comments/1wuuhi8/get_faster_at_writing_latex/),
+which struck a chord with that community.
+
 ## License
 
 [MIT](LICENSE). The bundled New Computer Modern fonts in `public/fonts/` keep their own license
